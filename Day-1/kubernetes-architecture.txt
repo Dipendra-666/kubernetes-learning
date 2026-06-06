@@ -1,0 +1,39 @@
+Architecture of the kubernetes?
+
+=>  Kubernetes follows a master-worker architecture, although nowadays we generally refer to the master node as the Control Plane and the worker machines as Worker Nodes.
+
+The Control Plane is responsible for managing the entire cluster, while the Worker Nodes are responsible for running the actual application containers.
+
+Starting with the Control Plane, there are five major components.
+
+The first component is the API Server. I usually describe it as the front door of Kubernetes because every communication inside the cluster goes through it. Whether it's a user running a kubectl command, a CI/CD pipeline deploying an application, or an internal Kubernetes component communicating with another component, everything talks through the API Server. It also handles authentication, authorization, and request validation before processing any request.
+
+The second component is etcd. etcd is a distributed key-value database that stores the complete state of the cluster. If I create a deployment with three replicas, information about that deployment is stored inside etcd. Kubernetes treats etcd as the source of truth because it contains details about Pods, Services, Deployments, Secrets, ConfigMaps, Nodes, and many other cluster resources. This is why etcd backups are extremely important in production environments.
+
+The third component is the Scheduler. The Scheduler's job is to determine where a Pod should run. Whenever a new Pod is created, the Scheduler evaluates all available Worker Nodes and checks factors such as CPU availability, memory availability, node affinity, taints and tolerations, and resource requirements. Based on these factors, it selects the most suitable Worker Node for the Pod.
+
+The fourth component is the Controller Manager. The Controller Manager continuously monitors the cluster and ensures that the actual state matches the desired state. For example, if a deployment is configured to run three replicas and one Pod crashes, the Controller Manager detects that only two Pods are running and automatically creates another Pod to bring the cluster back to the desired state. This reconciliation process is one of the key reasons Kubernetes is considered self-healing.
+
+The fifth component is the Cloud Controller Manager. This component is mainly used when Kubernetes runs on cloud platforms such as Azure AKS, AWS EKS, or Google GKE. It enables Kubernetes to communicate with cloud-provider APIs. For example, when we create a Service of type LoadBalancer, the Cloud Controller Manager communicates with the cloud provider and automatically provisions a cloud load balancer. It can also manage cloud storage volumes and cloud instances.
+
+Now moving to the Worker Node.
+
+The first component on the Worker Node is Kubelet. Kubelet acts as an agent running on every Worker Node. It constantly communicates with the API Server and receives instructions about which Pods should run on that node. Once it receives the instructions, it works with the container runtime to start the required containers and continuously reports the health status of the node and Pods back to the Control Plane.
+
+The second component is the Container Runtime. This is the software responsible for actually running containers. Popular container runtimes include containerd and CRI-O. When Kubelet receives instructions to start a Pod, it asks the container runtime to pull the container image, create the container, and start it.
+
+The third component is Kube Proxy. Kube Proxy handles networking inside the cluster. It maintains network rules that allow Pods and Services to communicate with each other. It also performs load balancing by distributing incoming traffic across multiple Pod replicas behind a Service.
+
+To explain how all these components work together, let's consider a real-world deployment scenario.
+
+Suppose a developer pushes code to GitHub, and a CI/CD pipeline triggers a deployment to Kubernetes. The deployment manifest is submitted to the API Server. The API Server validates the request and stores the desired state in etcd.
+
+The Controller Manager then notices that the deployment requires three Pods but currently none exist. It creates the Pod objects. The Scheduler examines the available Worker Nodes and decides where each Pod should run based on resource availability.
+
+Once a node is selected, the API Server updates the cluster state, and the Kubelet running on that Worker Node receives the instruction. The Kubelet then asks the container runtime to pull the application image and start the containers.
+
+After the Pods become healthy, Kube Proxy configures the networking rules so that traffic can reach the application through a Kubernetes Service.
+
+Now imagine one of the Pods crashes unexpectedly. The Controller Manager detects that the actual state no longer matches the desired state. Since the deployment requires three replicas and only two are running, it automatically creates a replacement Pod. The Scheduler assigns a node, Kubelet starts the Pod, and the application returns to its desired state without any manual intervention.
+
+This entire process demonstrates how Kubernetes provides automation, self-healing, load balancing, scalability, and high availability for containerized applications.
