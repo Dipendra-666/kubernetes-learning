@@ -1,4 +1,4 @@
-Kubernetes Architecture - Interview Answer
+Kubernetes Architecture 
 
 Kubernetes follows a master-worker architecture, although nowadays we generally refer to the master node as the Control Plane and the worker machines as Worker Nodes.
 
