@@ -591,3 +591,276 @@ Fix:
 # Real Interview Answer (2-Minute Version)
 
 "If a Pod is failing, I first run `kubectl get pods` to identify its status. Then I use `kubectl describe pod <pod-name>` to inspect events, scheduling information, container state, and Kubernetes-level errors. Next, I use `kubectl logs <pod-name>` to view application logs and identify runtime issues. If the container is restarting, I check `kubectl logs --previous` to see logs from the last crashed instance. If needed, I use `kubectl exec -it <pod-name> -- bash` to enter the container and verify configuration, environment variables, or network connectivity. Based on the findings, I troubleshoot common issues such as ImagePullBackOff, CrashLoopBackOff, Pending state, OOMKilled events, or probe failures."
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Kubernetes Interview Question: Difference Between Container, Pod, and Deployment
+
+## Overview
+
+In Kubernetes, Container, Pod, and Deployment are three different layers that work together.
+
+Their relationship can be represented as:
+
+```text
+Deployment
+    ↓
+   Pod
+    ↓
+Container
+```
+
+A Deployment manages Pods, and Pods contain one or more Containers.
+
+---
+
+# 1. What is a Container?
+
+A Container is the actual application runtime.
+
+It contains:
+
+* Application code
+* Runtime libraries
+* Dependencies
+* Configuration files
+
+Examples:
+
+* Nginx Container
+* Node.js Container
+* Java Spring Boot Container
+* Python Flask Container
+
+Example Docker Command:
+
+```bash
+docker run nginx
+```
+
+This command starts an Nginx container.
+
+### Key Points
+
+* Smallest execution unit.
+* Runs a single application process.
+* Created from a container image.
+* Portable across environments.
+
+### Interview Answer
+
+> A container is a lightweight and isolated runtime environment that packages an application along with its dependencies, libraries, and configurations.
+
+---
+
+# 2. What is a Pod?
+
+A Pod is the smallest deployable unit in Kubernetes.
+
+A Pod acts as a wrapper around one or more containers.
+
+Example:
+
+```text
+Pod
+ └── Nginx Container
+```
+
+A Pod can also contain multiple containers:
+
+```text
+Pod
+ ├── Application Container
+ └── Logging Sidecar Container
+```
+
+Containers inside the same Pod:
+
+* Share the same IP address
+* Share the same network namespace
+* Can communicate using localhost
+* Can share storage volumes
+
+### Why Do We Need Pods?
+
+Kubernetes does not manage containers directly.
+
+Instead, Kubernetes manages Pods.
+
+Pods provide:
+
+* Networking
+* Storage
+* Lifecycle management
+* Scheduling capabilities
+
+### Interview Answer
+
+> A Pod is the smallest deployable unit in Kubernetes that encapsulates one or more containers and provides shared networking and storage resources.
+
+---
+
+# 3. What is a Deployment?
+
+A Deployment is a Kubernetes object used to manage Pods.
+
+It ensures that the desired number of Pod replicas are always running.
+
+Example:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+```
+
+Kubernetes will create:
+
+```text
+Deployment
+      ↓
+  3 Pods
+      ↓
+Containers
+```
+
+### Responsibilities of a Deployment
+
+* Creates Pods
+* Scales Pods
+* Replaces failed Pods
+* Performs rolling updates
+* Supports rollbacks
+
+### Example
+
+Suppose we have:
+
+```text
+Deployment
+      ↓
+  3 Pods
+```
+
+If one Pod crashes:
+
+```text
+Deployment
+      ↓
+Pod 1 ✓
+Pod 2 ✗
+Pod 3 ✓
+```
+
+Deployment automatically creates a new Pod:
+
+```text
+Deployment
+      ↓
+Pod 1 ✓
+Pod 2 ✓ (new)
+Pod 3 ✓
+```
+
+### Interview Answer
+
+> A Deployment is a Kubernetes resource that manages Pods and ensures the desired number of replicas are running while providing features such as scaling, self-healing, rolling updates, and rollbacks.
+
+---
+
+# Real-World Analogy
+
+Imagine a restaurant.
+
+## Container = Chef
+
+The chef is the person actually cooking food.
+
+```text
+Chef = Container
+```
+
+---
+
+## Pod = Kitchen
+
+The kitchen contains one or more chefs working together.
+
+```text
+Kitchen = Pod
+```
+
+---
+
+## Deployment = Restaurant Manager
+
+The manager decides:
+
+* How many kitchens should exist
+* Creates new kitchens when needed
+* Replaces broken kitchens
+* Updates all kitchens to a new menu
+
+```text
+Restaurant Manager = Deployment
+```
+
+---
+
+# Comparison Table
+
+| Feature            | Container                | Pod                    | Deployment       |
+| ------------------ | ------------------------ | ---------------------- | ---------------- |
+| Purpose            | Run Application          | Group Containers       | Manage Pods      |
+| Managed By         | Docker/Container Runtime | Kubernetes             | Kubernetes       |
+| Contains           | Application Process      | One or More Containers | One or More Pods |
+| Scaling            | No                       | No                     | Yes              |
+| Self-Healing       | No                       | Limited                | Yes              |
+| Rolling Updates    | No                       | No                     | Yes              |
+| Replica Management | No                       | No                     | Yes              |
+
+---
+
+# Visual Representation
+
+```text
+Deployment
+│
+├── Pod 1
+│    └── Container
+│
+├── Pod 2
+│    └── Container
+│
+└── Pod 3
+     └── Container
+```
+
+---
+
+# Interview Answer (2-Minute Version)
+
+A container is the actual application runtime that contains the application code and its dependencies. Kubernetes does not manage containers directly; instead, it runs them inside Pods. A Pod is the smallest deployable unit in Kubernetes and acts as a wrapper around one or more containers while providing shared networking and storage. A Deployment sits above Pods and manages their lifecycle by ensuring the desired number of Pod replicas are running, replacing failed Pods, performing rolling updates, and enabling rollbacks.
+
+---
+
+# One-Line Summary
+
+```text
+Container = Application
+Pod       = Wrapper Around Container(s)
+Deployment = Manager of Pods
+```
